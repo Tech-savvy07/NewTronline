@@ -25,6 +25,7 @@ async function generateEventQuery(result) {
           let k = 0;
           let refId_from_reg;
           let obj = "";
+          let walletAddress = "";
           let trx_amt = 0;
           let invest = 0;
           let reinvest = 0;
@@ -33,7 +34,7 @@ async function generateEventQuery(result) {
           let promoterId = 0;
           await Registration.findOne({}, "investorId")
             .sort({
-              investorId: -1
+              investorId: -1,
             })
             .then((resp) => {
               if (resp) {
@@ -45,13 +46,13 @@ async function generateEventQuery(result) {
             if (index[k].length > 2) {
               let value = result[i]["result"][index[k]];
               value =
-                index[k] == "waddress" ?
-                value.startsWith("0x") ?
-                tronWeb.address.fromHex(value) :
-                value :
-                value;
+                index[k] == "waddress"
+                  ? value.startsWith("0x")
+                    ? tronWeb.address.fromHex(value)
+                    : value
+                  : value;
               if (index[k] == "waddress") {
-                sobj += `"waddress" : "${value}",`;
+                walletAddress = value;
               }
               if (index[k] == "trx_amt") {
                 trx_amt = value;
@@ -80,8 +81,14 @@ async function generateEventQuery(result) {
           let block_number = result[i]["block_number"];
           let timestamp = parseInt(result[i]["block_timestamp"] / 1000);
           obj += `"block_timestamp": "${timestamp}",`;
-          console.log("OBGGGG", obj)
           obj += `"transaction_id" : "${transaction_id}",`;
+          if(reinvest){
+              await Registration.findOne({investorId : investorId}).then((data)=>{
+                    let dhde = data.referrerId;
+                    obj += `"referrerId" : "${dhde}",`;
+              })
+          }
+          
           obj += `"block_number" : "${block_number}",`;
 
           if (result[i]["event_name"] == "Registration") {
@@ -91,49 +98,58 @@ async function generateEventQuery(result) {
           }
           obj += `"random_id" : "${ranodm_id}"`;
           sobj += `"transaction_id" : "${transaction_id}"`;
-          // let txid1 = `"transaction_id" : "${transaction_id}"`;
-          // sobj += `"block_number" : "${block_number}"`;
 
           if (result[i]["event_name"] == "Registration") {
-
             let select_qry = `{${sobj}}`;
             let insert_qry = `{${obj}}`;
-            console.log("select_qry", sobj);
-            await Registration.findOne({
-              $or: [JSON.parse(select_qry)]
-            }).then(
+            // console.log("select_qry", sobj);
+            await Registration.findOne(JSON.parse(select_qry)).then(
               async (data) => {
-                console.log("dfjhdc", data);
                 if (!data) {
                   await Registration.create(JSON.parse(insert_qry));
                   let reg_data = await Registration.count({
                     referrerId: refId_from_reg,
                   }).exec();
-                  await Registration.updateOne({
-                    investorId: refId_from_reg
-                  }, {
-                    $set: {
-                      direct_member: Number(reg_data)
+                  await Registration.updateOne(
+                    {
+                      investorId: refId_from_reg,
+                    },
+                    {
+                      $set: {
+                        direct_member: Number(reg_data),
+                      },
                     }
-                  }).then(async () => {
+                  ).then(async () => {
                     let dep_status = 1;
-                    const val_dep = await Deposit.findOne(JSON.parse(select_qry));
-                    if (val_dep == null)
-                      dep_status = 0;
-                    console.log("TX ID 1::", trx_amt, invest, dep_status, val_dep)
+                    const val_dep = await Deposit.findOne(
+                      JSON.parse(select_qry)
+                    );
+                    if (val_dep == null) dep_status = 0;
+                    // console.log(
+                    //   "TX ID 1::",
+                    //   trx_amt,
+                    //   invest,
+                    //   dep_status,
+                    //   val_dep
+                    // );
                     if (dep_status === 0) {
                       if (invest == 1) {
                         let reg_datass = await Registration.findOne({
                           investorId: investorId,
                         }).exec();
                         if (trx_amt == 500000000) {
-                          await Registration.updateOne({
-                            investorId: investorId
-                          }, {
-                            $set: {
-                              total_investment: Number(reg_datass.total_investment) + Number(trx_amt),
+                          await Registration.updateOne(
+                            {
+                              investorId: investorId,
                             },
-                          }).exec();
+                            {
+                              $set: {
+                                total_investment:
+                                  Number(reg_datass.total_investment) +
+                                  Number(trx_amt),
+                              },
+                            }
+                          ).exec();
                         }
                       }
                       await Deposit.create(JSON.parse(insert_qry));
@@ -147,8 +163,6 @@ async function generateEventQuery(result) {
             let select_qry_dep = `{${sobj}}`;
             let insert_qry_dep = `{${obj}}`;
             let dep_status = 1;
-            // console.log("select_qry_dep", obj);
-            // console.log("insert_qry_dep", sobj);
             const val_dep = await Deposit.findOne(JSON.parse(select_qry_dep));
             if (val_dep == null) dep_status = 0;
             if (dep_status === 0) {
@@ -157,16 +171,56 @@ async function generateEventQuery(result) {
                   investorId: investorId,
                 }).exec();
                 if (trx_amt == 2000000000) {
-                  await Registration.updateOne({
-                    investorId: investorId
-                  }, {
-                    $set: {
-                      vip1: 1,
-                      vip1_income: Number(4000000000),
-                      total_investment: Number(reg_datas.total_investment ? reg_datas.total_investment : 0) + Number(trx_amt),
-                      vip1_reinvest_count: Number(reg_datas.vip1_reinvest_count ? reg_datas.vip1_reinvest_count : 0) + 1
+                  await Registration.updateOne(
+                    {
+                      investorId: investorId,
                     },
-                  }).exec();
+                    {
+                      $set: {
+                        vip1: 1,
+                        vip1_income: Number(4000000000),
+                        total_investment:
+                          Number(
+                            reg_datas.total_investment
+                              ? reg_datas.total_investment
+                              : 0
+                          ) + Number(trx_amt),
+                        vip1_reinvest_count:
+                          Number(
+                            reg_datas.vip1_reinvest_count
+                              ? reg_datas.vip1_reinvest_count
+                              : 0
+                          ) + 1,
+                      },
+                    }
+                  ).then(() => {
+                    Registration.findOne({
+                      investorId: refId_from_reg,
+                    }).then((reg_point) => {
+                      Deposit.count({
+                        investorId: investorId,
+                        invest_type: "REINVEST",
+                        createdAt: { $gt: "2022-01-16T07:00:00.622+00:00" },
+                      }).then((dep_count) => {
+                        let tot_point = 0;
+                        if (dep_count == 2) {
+                          tot_point = Number(1) + Number(reg_point) + 3;
+                        } else {
+                          tot_point = Number(1) + Number(reg_point);
+                        }
+                        Registration.updateOne(
+                          {
+                            investorId: refId_from_reg,
+                          },
+                          {
+                            $set: {
+                              point: tot_point,
+                            },
+                          }
+                        );
+                      });
+                    });
+                  });
                   const vipHistory = new VipHistory({
                     investorId: investorId,
                     random_id: ranodm_id,
@@ -176,16 +230,52 @@ async function generateEventQuery(result) {
                   });
                   await vipHistory.save();
                 } else if (trx_amt == 5000000000) {
-                  await Registration.updateOne({
-                    investorId: investorId
-                  }, {
-                    $set: {
-                      vip2: 1,
-                      vip2_income: Number(12500000000),
-                      total_investment: Number(reg_datas.total_investment) + Number(trx_amt),
-                      vip2_reinvest_count: Number(reg_datas.vip2_reinvest_count ? reg_datas.vip2_reinvest_count : 0) + 1
+                  await Registration.updateOne(
+                    {
+                      investorId: investorId,
                     },
-                  }).exec();
+                    {
+                      $set: {
+                        vip2: 1,
+                        vip2_income: Number(12500000000),
+                        total_investment:
+                          Number(reg_datas.total_investment) + Number(trx_amt),
+                        vip2_reinvest_count:
+                          Number(
+                            reg_datas.vip2_reinvest_count
+                              ? reg_datas.vip2_reinvest_count
+                              : 0
+                          ) + 1,
+                      },
+                    }
+                  ).then(() => {
+                    Registration.findOne({
+                      investorId: refId_from_reg,
+                    }).then((reg_point) => {
+                      Deposit.count({
+                        investorId: investorId,
+                        invest_type: "REINVEST",
+                        createdAt: { $gt: "2022-01-16T07:00:00.622+00:00" },
+                      }).then((dep_count) => {
+                        let tot_point = 0;
+                        if (dep_count == 2) {
+                          tot_point = Number(2) + Number(reg_point) + 3;
+                        } else {
+                          tot_point = Number(2) + Number(reg_point);
+                        }
+                        Registration.updateOne(
+                          {
+                            investorId: refId_from_reg,
+                          },
+                          {
+                            $set: {
+                              point: tot_point,
+                            },
+                          }
+                        );
+                      });
+                    });
+                  });
                   const vipHistory = new VipHistory({
                     investorId: investorId,
                     random_id: ranodm_id,
@@ -195,16 +285,52 @@ async function generateEventQuery(result) {
                   });
                   await vipHistory.save();
                 } else if (trx_amt == 10000000000) {
-                  await Registration.updateOne({
-                    investorId: investorId
-                  }, {
-                    $set: {
-                      vip3: 1,
-                      vip3_income: Number(30000000000),
-                      total_investment: Number(reg_datas.total_investment) + Number(trx_amt),
-                      vip3_reinvest_count: Number(reg_datas.vip3_reinvest_count ? reg_datas.vip3_reinvest_count : 0) + 1
+                  await Registration.updateOne(
+                    {
+                      investorId: investorId,
                     },
-                  }).exec();
+                    {
+                      $set: {
+                        vip3: 1,
+                        vip3_income: Number(30000000000),
+                        total_investment:
+                          Number(reg_datas.total_investment) + Number(trx_amt),
+                        vip3_reinvest_count:
+                          Number(
+                            reg_datas.vip3_reinvest_count
+                              ? reg_datas.vip3_reinvest_count
+                              : 0
+                          ) + 1,
+                      },
+                    }
+                  ).then(() => {
+                    Registration.findOne({
+                      investorId: refId_from_reg,
+                    }).then((reg_point) => {
+                      Deposit.count({
+                        investorId: investorId,
+                        invest_type: "REINVEST",
+                        createdAt: { $gt: "2022-01-16T07:00:00.622+00:00" },
+                      }).then((dep_count) => {
+                        let tot_point = 0;
+                        if (dep_count == 2) {
+                          tot_point = Number(4) + Number(reg_point) + 3;
+                        } else {
+                          tot_point = Number(4) + Number(reg_point);
+                        }
+                        Registration.updateOne(
+                          {
+                            investorId: refId_from_reg,
+                          },
+                          {
+                            $set: {
+                              point: tot_point,
+                            },
+                          }
+                        );
+                      });
+                    });
+                  });
                   const vipHistory = new VipHistory({
                     investorId: investorId,
                     random_id: ranodm_id,
@@ -226,7 +352,7 @@ async function generateEventQuery(result) {
     }
     return {
       csql: csql_arr,
-      sql: sql_arr
+      sql: sql_arr,
     };
   } catch (e) {
     console.log("Index.js Error in generateEventQuery::", e);
@@ -264,7 +390,7 @@ async function generateEventQuery(result) {
 
 async function getLastEntryofRegistration() {
   const lastDatawa = await Registration.find({}).sort({
-    investorId: -1
+    investorId: -1,
   });
   return Number(lastDatawa[0].block_timestamp) * 1000;
 }
@@ -277,16 +403,16 @@ exports.foreverExcute = async function foreverExcute(
     mintimestamp = await getLastEntryofRegistration();
     console.log("min timestamp::", mintimestamp);
   } else {
-    console.log("puranka  timestamp::", mintimestamp, );
+    console.log("puranka  timestamp::", mintimestamp);
   }
   fetch(
-      `https://api.trongrid.io/v1/contracts/${CONTRACT}/events?limit=100&min_timestamp=${mintimestamp}&onlyUnconfirmed=true&order_by=timestamp,asc&fingerprint=${fingerprint}`
-    )
+    `https://api.trongrid.io/v1/contracts/${CONTRACT}/events?limit=100&min_timestamp=${mintimestamp}&onlyUnconfirmed=true&order_by=timestamp,asc&fingerprint=${fingerprint}`
+  )
     .then((d) => d.json())
     .then(async (result) => {
       // console.log(result)
       if (result.data) {
-        // console.log(result.data);
+        console.log(result.data);
         let res = await generateEventQuery(result.data);
       }
       if (result.meta.fingerprint ? true : false)

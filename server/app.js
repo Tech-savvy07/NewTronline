@@ -10,7 +10,8 @@ env.config();
 const {
   foreverExcute
 } = require("./Controller/index");
-const db = `mongodb+srv://tronline:AngularJSs07@cluster0.ywplu.mongodb.net/tronline?retryWrites=true&w=majority`;
+// const db = `mongodb+srv://techsavvy:macbook@cluster0.pahku.mongodb.net/tronnine?retryWrites=true&w=majority`
+const db = `mongodb+srv://tronline:AngularJSs07@cluster0.ywplu.mongodb.net/tronline?retryWrites=true&w=majority`
 mongoose
   .connect(db, {
     useNewUrlParser: true,

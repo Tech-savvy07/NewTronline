@@ -12,6 +12,7 @@ const registration = new mongoose.Schema(
     promoter: { type: String },
     block_timestamp: { type: String },
     transaction_id: { type: String, unique: true },
+    point: { type: Number, default: 0 },
     wallet_amount: { type: Number, default: 0 },
     direct_member: { type: Number, default: 0 },
     total_investment: { type: Number, default: 0 },

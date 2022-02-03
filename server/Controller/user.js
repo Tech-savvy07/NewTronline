@@ -40,8 +40,8 @@ async function withraw_lock(investorId, lock_status, count = 0, ip = "") {
     return await Withdrawal_lock.create(doc);
   } else {
     Withdrawal_lock.findOne({
-        investorId: investorId,
-      })
+      investorId: investorId,
+    })
       .then(async (res) => {
         if (res.count <= 2) {
           const query = {
@@ -56,6 +56,7 @@ async function withraw_lock(investorId, lock_status, count = 0, ip = "") {
   }
 }
 
+
 function level_income_per(level) {
   if (level == 1) {
     return 15;
@@ -66,11 +67,21 @@ function level_income_per(level) {
   } else if (level == 4) {
     return 2;
   } else if (level == 5) {
-    return 5;
+    return 4;
   } else if (level == 6) {
-    return 3;
+    return 1;
   } else if (level == 7) {
-    return 3;
+    return 1;
+  } else if (level == 8) {
+    return 1;
+  } else if (level == 9) {
+    return 1;
+  } else if (level == 10) {
+    return 1;
+  } else if (level == 11) {
+    return 1;
+  } else if (level == 12) {
+    return 1;
   }
 }
 
@@ -194,10 +205,12 @@ async function get_direct_member(req, res) {
   try {
     const investorId = req.body.investorId;
     await Registration.find({
-        referrerId: investorId,
-      },
+      referrerId: investorId,
+    },
       "waddress investorId random_id total_investment createdAt"
-    ).then((data, error) => {
+    ).sort({
+      createdAt: 1,
+    }).then((data, error) => {
       if (error) {
         return res.status(400).json({
           status: "error",
@@ -258,9 +271,9 @@ async function getWithdrawal(req, res) {
     const investorId = req.body.investorId ? req.body.investorId : "";
     const limit = req.body.limit ? req.body.limit : 100;
     let reg = await Withdrawlhistory.find({
-        investorId: investorId,
-        withdrawal_type: "INCOME WITHDRAWAL",
-      })
+      investorId: investorId,
+      withdrawal_type: "INCOME WITHDRAWAL",
+    })
       .sort({
         createdAt: -1,
       })
@@ -287,8 +300,8 @@ async function getWithdrawalConditions(req, res) {
   try {
     const investorId = req.body.investorId;
     await Registration.findOne({
-        investorId: investorId,
-      },
+      investorId: investorId,
+    },
       "investorId random_id total_investment direct_member"
     ).then((data, error) => {
       if (error) {
@@ -348,68 +361,68 @@ async function personal_details(req, res) {
 
       myCommunity = refferal_id_data.direct_member;
       const totaldeposit = await Deposit.aggregate([{
-          $match: {
-            investorId: investorId,
+        $match: {
+          investorId: investorId,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          sum: {
+            $sum: "$trx_amt",
           },
         },
-        {
-          $group: {
-            _id: null,
-            sum: {
-              $sum: "$trx_amt",
-            },
-          },
-        },
+      },
       ]);
       totaldepositedtrx = totaldeposit[0] ? totaldeposit[0].sum : 0;
 
       const totalreinvest = await Deposit.aggregate([{
-          $match: {
-            investorId: investorId,
-            invest_type: "REINVESTMENT",
+        $match: {
+          investorId: investorId,
+          invest_type: "REINVESTMENT",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          sum: {
+            $sum: "$trx_amt",
           },
         },
-        {
-          $group: {
-            _id: null,
-            sum: {
-              $sum: "$trx_amt",
-            },
-          },
-        },
+      },
       ]);
       totalreinvesttrx = totalreinvest[0] ? totalreinvest[0].sum : 0;
       const incomewithdraw = await Withdrawlhistory.aggregate([{
-          $match: {
-            investorId: investorId,
-            withdrawal_type: "INCOME WITHDRAWAL",
+        $match: {
+          investorId: investorId,
+          withdrawal_type: "INCOME WITHDRAWAL",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          sum: {
+            $sum: "$total_amount",
           },
         },
-        {
-          $group: {
-            _id: null,
-            sum: {
-              $sum: "$total_amount",
-            },
-          },
-        },
+      },
       ]);
       const vipwithdraw = await Withdrawlhistory.aggregate([{
-          $match: {
-            investorId: investorId,
-            withdrawal_type: {
-              $in: ["VIP 1 WITHDRAWAL", "VIP 2 WITHDRAWAL", "VIP 3 WITHDRAWAL"],
-            },
+        $match: {
+          investorId: investorId,
+          withdrawal_type: {
+            $in: ["VIP 1 WITHDRAWAL", "VIP 2 WITHDRAWAL", "VIP 3 WITHDRAWAL"],
           },
         },
-        {
-          $group: {
-            _id: null,
-            sum: {
-              $sum: "$total_amount",
-            },
+      },
+      {
+        $group: {
+          _id: null,
+          sum: {
+            $sum: "$total_amount",
           },
         },
+      },
       ]);
       incomewithdrawaltrx = incomewithdraw[0] ? incomewithdraw[0].sum : 0;
       vipwithdrawaltrx = vipwithdraw[0] ? vipwithdraw[0].sum : 0;
@@ -424,24 +437,24 @@ async function personal_details(req, res) {
           $sum: "$trx_amt",
         },
       },
-    }, ]);
+    },]);
     communitydeposittrx = communitydeposit[0] ? communitydeposit[0].sum : 0;
 
     const communitywithdrawal = await Withdrawlhistory.aggregate([{
-        $match: {
-          withdrawal_amount: {
-            $gt: 0,
-          },
+      $match: {
+        withdrawal_amount: {
+          $gt: 0,
         },
       },
-      {
-        $group: {
-          _id: null,
-          sum: {
-            $sum: "$total_amount",
-          },
+    },
+    {
+      $group: {
+        _id: null,
+        sum: {
+          $sum: "$total_amount",
         },
       },
+    },
     ]);
     communitywithdrawaltrx = communitywithdrawal[0] ?
       communitywithdrawal[0].sum :
@@ -483,47 +496,47 @@ async function get_community_level_incomes(req, res) {
   const investorId = req.body.investorId ? req.body.investorId : 0;
   const limit = req.body.limit ? req.body.limit : 100;
   const regdata = await Registration.find({
-      $and: [{
-          investorId: {
-            $gte: investorId,
-          },
-        },
-        {
-          investorId: {
-            $lte: investorId + 20,
-          },
-        },
-      ],
-    },
-    "random_id investorId"
-  );
-  const totalId = await Deposit.aggregate([{
-      $match: {
-        $and: [{
-            investorId: {
-              $gte: investorId,
-            },
-          },
-          {
-            investorId: {
-              $lte: investorId + 20,
-            },
-          },
-        ],
+    $and: [{
+      investorId: {
+        $gte: investorId,
       },
     },
     {
-      $group: {
-        _id: {
-          invest_type: "$invest_type",
-          id: "$investorId",
-        },
-        sum: {
-          $sum: "$trx_amt",
-        },
+      investorId: {
+        $lte: investorId + 20,
       },
     },
-  ]);
+    ],
+  },
+    "random_id investorId"
+  ).sort({ createdAt: 1 });
+  const totalId = await Deposit.aggregate([{
+    $match: {
+      $and: [{
+        investorId: {
+          $gte: investorId,
+        },
+      },
+      {
+        investorId: {
+          $lte: investorId + 20,
+        },
+      },
+      ],
+    },
+  },
+  {
+    $group: {
+      _id: {
+        invest_type: "$invest_type",
+        id: "$investorId",
+      },
+      sum: {
+        $sum: "$trx_amt",
+      },
+    },
+  },
+  ]).sort({ createdAt: 1 });
   let f_data = [];
   for (let i = 0; i < regdata.length; i++) {
     let d = totalId.filter((d1) => {
@@ -553,11 +566,11 @@ async function get_community_level_incomes(req, res) {
     f_data.push(obj);
   }
   let sponsor = await Transaction.find({
-        investorId: investorId,
-        income_type: "SPONSORING INCOME",
-      },
-      "investorId random_id income_from_random_id total_income income_type level"
-    )
+    investorId: investorId,
+    income_type: "SPONSORING INCOME",
+  },
+    "investorId random_id income_from_random_id total_income income_type level createdAt income_date"
+  )
     .sort({
       createdAt: -1,
     })
@@ -575,13 +588,13 @@ async function get_allupdown_income(req, res) {
     const investorId = req.body.investorId;
     const limit = req.body.limit ? req.body.limit : 100;
     let data = await Transaction.find({
-        investorId: investorId,
-        income_type: {
-          $in: ["COMMUNITY LEVELDOWN INCOME", "COMMUNITY LEVELUP INCOME"],
-        },
-      })
+      investorId: investorId,
+      income_type: {
+        $in: ["COMMUNITY LEVELDOWN INCOME", "COMMUNITY LEVELUP INCOME"],
+      },
+    })
       .sort({
-        level: 1,
+        createdAt: -1,
       })
       .limit(limit);
     if (data) {
@@ -605,15 +618,15 @@ async function get_vip_sponsor_level_incomes(req, res) {
     const investorId = req.body.investorId;
     const limit = req.body.limit ? req.body.limit : 100;
     let vip_sponsor = await Transaction.find({
-        investorId: investorId,
-        income_type: {
-          $in: [
-            "VIP 1 SPONSOR INCOME",
-            "VIP 2 SPONSOR INCOME",
-            "VIP 3 SPONSOR INCOME",
-          ],
-        },
-      })
+      investorId: investorId,
+      income_type: {
+        $in: [
+          "VIP 1 SPONSOR INCOME",
+          "VIP 2 SPONSOR INCOME",
+          "VIP 3 SPONSOR INCOME",
+        ],
+      },
+    })
       .limit(limit)
       .sort({
         createdAt: -1,
@@ -639,11 +652,11 @@ async function get_vip_income_withdraw(req, res) {
     const investorId = req.body.investorId;
     const limit = req.body.limit ? req.body.limit : 100;
     let vip_sponsor = await Withdrawlhistory.find({
-        investorId: investorId,
-        withdrawal_type: {
-          $in: ["VIP 1 WITHDRAWAL", "VIP 2 WITHDRAWAL", "VIP 3 WITHDRAWAL"],
-        },
-      })
+      investorId: investorId,
+      withdrawal_type: {
+        $in: ["VIP 1 WITHDRAWAL", "VIP 2 WITHDRAWAL", "VIP 3 WITHDRAWAL"],
+      },
+    })
       .limit(limit)
       .sort({
         createdAt: -1,
@@ -772,7 +785,7 @@ async function withdrawal_request(req, res) {
     const investorId = req.body.investorId;
     const waddress = req.body.waddress;
     const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-    if (1) {
+    if (true) {
       if (waddress && investorId) {
         const result = await Registration.findOne({
           investorId: investorId,
@@ -792,8 +805,6 @@ async function withdrawal_request(req, res) {
             });
           } else {
             withraw_lock(investorId, 1, 0, ip)
-
-            
               .then(async (data) => {
                 if (data) {
                   const total_investment = Number(result.total_investment) / 1e6;
@@ -818,7 +829,6 @@ async function withdrawal_request(req, res) {
                         admin_charge: admin_charge,
                         withdrawal_amount: withdrawal_amount,
                         reinvest_amount: reinvest_amount,
-                        block_timestamp: new Date().getTime(),
                         ip_address: ip,
                         withdrawal_type: "INCOME WITHDRAWAL",
                         payout_status: 0,
@@ -921,13 +931,13 @@ async function withdrawal_request(req, res) {
                         }
                       }
                       await Registration.updateOne({
-                          investorId: investorId,
-                        }, {
-                          $set: {
-                            wallet_amount: Number(result.wallet_amount) -
-                              Number(req_withdrawl),
-                          },
-                        })
+                        investorId: investorId,
+                      }, {
+                        $set: {
+                          wallet_amount: Number(result.wallet_amount) -
+                            Number(req_withdrawl),
+                        },
+                      })
                         .then((res) => {
                           withdrawal(
                             result.waddress,
@@ -1007,7 +1017,7 @@ async function vip1_income_withdrawal_request(req, res) {
     const investorId = req.body.investorId;
     const waddress = req.body.waddress;
     const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-    if (1) {
+    if (true) {
       if (waddress && investorId) {
         const it = await Registration.findOne({
           investorId: investorId,
@@ -1069,13 +1079,13 @@ async function vip1_income_withdrawal_request(req, res) {
                       });
                       await trancsaction.save();
                       await Registration.updateOne({
-                          investorId: sponsorId,
-                        }, {
-                          $set: {
-                            wallet_amount: Number(ref_data.wallet_amount) +
-                              Number(sponsor_withdrawal_amount),
-                          },
-                        })
+                        investorId: sponsorId,
+                      }, {
+                        $set: {
+                          wallet_amount: Number(ref_data.wallet_amount) +
+                            Number(sponsor_withdrawal_amount),
+                        },
+                      })
                         .then(async (data) => {
                           if (data) {
                             await withraw_lock(investorId, 0);
@@ -1110,15 +1120,15 @@ async function vip1_income_withdrawal_request(req, res) {
                   ) {
                     if (req_withdrawl >= 50) {
                       await Registration.updateOne({
-                          investorId: investorId,
-                        }, {
-                          $set: {
-                            vip1_wallet: Number(it.vip1_wallet) -
-                              Number(req_withdrawl) * 1e6,
-                            withdraw_vip_income: Number(it.withdraw_vip_income) +
-                              Number(req_withdrawl) * 1e6,
-                          },
-                        })
+                        investorId: investorId,
+                      }, {
+                        $set: {
+                          vip1_wallet: Number(it.vip1_wallet) -
+                            Number(req_withdrawl) * 1e6,
+                          withdraw_vip_income: Number(it.withdraw_vip_income) +
+                            Number(req_withdrawl) * 1e6,
+                        },
+                      })
                         .then(() => {
                           withdrawal(
                             investorId,
@@ -1202,7 +1212,7 @@ async function vip2_income_withdrawal_request(req, res) {
     const investorId = req.body.investorId;
     const waddress = req.body.waddress;
     const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-    if (1) {
+    if (true) {
       if (waddress && investorId) {
         const it = await Registration.findOne({
           investorId: investorId,
@@ -1264,13 +1274,13 @@ async function vip2_income_withdrawal_request(req, res) {
                       });
                       await trancsaction.save();
                       await Registration.updateOne({
-                          investorId: sponsorId,
-                        }, {
-                          $set: {
-                            wallet_amount: Number(ref_data.wallet_amount) +
-                              Number(sponsor_withdrawal_amount),
-                          },
-                        })
+                        investorId: sponsorId,
+                      }, {
+                        $set: {
+                          wallet_amount: Number(ref_data.wallet_amount) +
+                            Number(sponsor_withdrawal_amount),
+                        },
+                      })
                         .then(async (data) => {
                           if (data) {
                             await withraw_lock(investorId, 0);
@@ -1305,15 +1315,15 @@ async function vip2_income_withdrawal_request(req, res) {
                   ) {
                     if (req_withdrawl >= 50) {
                       await Registration.updateOne({
-                          investorId: investorId,
-                        }, {
-                          $set: {
-                            vip2_wallet: Number(it.vip2_wallet) -
-                              Number(req_withdrawl) * 1e6,
-                            withdraw_vip_income: Number(it.withdraw_vip_income) +
-                              Number(req_withdrawl) * 1e6,
-                          },
-                        })
+                        investorId: investorId,
+                      }, {
+                        $set: {
+                          vip2_wallet: Number(it.vip2_wallet) -
+                            Number(req_withdrawl) * 1e6,
+                          withdraw_vip_income: Number(it.withdraw_vip_income) +
+                            Number(req_withdrawl) * 1e6,
+                        },
+                      })
                         .then(() => {
                           withdrawal(
                             investorId,
@@ -1397,7 +1407,7 @@ async function vip3_income_withdrawal_request(req, res) {
     const investorId = req.body.investorId;
     const waddress = req.body.waddress;
     const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-    if (1) {
+    if (true) {
       if (waddress && investorId) {
         const it = await Registration.findOne({
           investorId: investorId,
@@ -1459,13 +1469,13 @@ async function vip3_income_withdrawal_request(req, res) {
                       });
                       await trancsaction.save();
                       await Registration.updateOne({
-                          investorId: sponsorId,
-                        }, {
-                          $set: {
-                            wallet_amount: Number(ref_data.wallet_amount) +
-                              Number(sponsor_withdrawal_amount),
-                          },
-                        })
+                        investorId: sponsorId,
+                      }, {
+                        $set: {
+                          wallet_amount: Number(ref_data.wallet_amount) +
+                            Number(sponsor_withdrawal_amount),
+                        },
+                      })
                         .then(async (data) => {
                           if (data) {
                             await withraw_lock(investorId, 0);
@@ -1500,15 +1510,15 @@ async function vip3_income_withdrawal_request(req, res) {
                   ) {
                     if (req_withdrawl >= 50) {
                       await Registration.updateOne({
-                          investorId: investorId,
-                        }, {
-                          $set: {
-                            vip3_wallet: Number(it.vip3_wallet) -
-                              Number(req_withdrawl) * 1e6,
-                            withdraw_vip_income: Number(it.withdraw_vip_income) +
-                              Number(req_withdrawl) * 1e6,
-                          },
-                        })
+                        investorId: investorId,
+                      }, {
+                        $set: {
+                          vip3_wallet: Number(it.vip3_wallet) -
+                            Number(req_withdrawl) * 1e6,
+                          withdraw_vip_income: Number(it.withdraw_vip_income) +
+                            Number(req_withdrawl) * 1e6,
+                        },
+                      })
                         .then(() => {
                           withdrawal(
                             investorId,
@@ -1923,10 +1933,10 @@ async function send_all_vip_club_income(req, res) {
               vip_club: Number(setting_data.vip_club) - Number(remain_vip_income),
               total_vip_club: Number(
                 setting_data ?
-                setting_data.total_vip_club ?
-                Number(setting_data.total_vip_club) :
-                0 :
-                0
+                  setting_data.total_vip_club ?
+                    Number(setting_data.total_vip_club) :
+                    0 :
+                  0
               ) + Number(remain_vip_income),
             },
           }).exec();
@@ -2102,7 +2112,7 @@ async function seven_level_paid(
   i,
   transaction_id
 ) {
-  if (i < 8) {
+  if (i < 13) {
     if (ref_id == 0) {
       return 0;
     }
@@ -2111,6 +2121,18 @@ async function seven_level_paid(
     let reg = await Registration.findOne({
       investorId: ref_id,
     }).exec();
+    let tot_deposit = await Deposit.aggregate([{
+      $match: {
+        investorId: ref_id,
+      }
+    }, {
+      $group: {
+        _id: null,
+        sum: {
+          $sum: "$trx_amt"
+        }
+      }
+    }]);
     let w_amt = reg.wallet_amount;
     if (i > 4 && reg.direct_member < 5) {
       ref_id = reg.referrerId;
@@ -2126,6 +2148,7 @@ async function seven_level_paid(
       return d1 + 1;
     } else {
       if (i <= 4) {
+        console.log("i < = 4", i)
         const transaction = new Transaction({
           investorId: ref_id,
           random_id: reg.random_id,
@@ -2147,31 +2170,59 @@ async function seven_level_paid(
           },
         }).exec();
       } else if (i > 4) {
-        if (reg.direct_member > 3) {
-          const transaction = new Transaction({
-            investorId: ref_id,
-            random_id: reg.random_id,
-            wallet_address: reg.waddress,
-            income_from_random_id: random_id,
-            income_from_id: investorId,
-            total_income: net_income,
-            income_type: "SPONSORING INCOME",
-            transaction_id: transaction_id,
-            invest_type: invest_type,
-            level: i,
-          });
-          await transaction.save();
-          await Registration.updateOne({
-            investorId: reg.investorId,
-          }, {
-            $set: {
-              wallet_amount: Number(w_amt) + Number(net_income),
-            },
-          }).exec();
+        if (reg.direct_member >= 5) {
+          if (i < 8) {
+            console.log("i < 8", i)
+            const transaction = new Transaction({
+              investorId: ref_id,
+              random_id: reg.random_id,
+              wallet_address: reg.waddress,
+              income_from_random_id: random_id,
+              income_from_id: investorId,
+              total_income: net_income,
+              income_type: "SPONSORING INCOME",
+              transaction_id: transaction_id,
+              invest_type: invest_type,
+              level: i,
+            });
+            await transaction.save();
+            await Registration.updateOne({
+              investorId: reg.investorId,
+            }, {
+              $set: {
+                wallet_amount: Number(w_amt) + Number(net_income),
+              },
+            }).exec();
+          } else {
+            console.log("i >= 8", i, Number(tot_deposit[0].sum / 1e6).toFixed(2), 5000)
+            if (tot_deposit[0].sum >= 5000 * 1e6) {
+              const transaction = new Transaction({
+                investorId: ref_id,
+                random_id: reg.random_id,
+                wallet_address: reg.waddress,
+                income_from_random_id: random_id,
+                income_from_id: investorId,
+                total_income: net_income,
+                income_type: "SPONSORING INCOME",
+                transaction_id: transaction_id,
+                invest_type: invest_type,
+                level: i,
+              });
+              await transaction.save();
+              await Registration.updateOne({
+                investorId: reg.investorId,
+              }, {
+                $set: {
+                  wallet_amount: Number(w_amt) + Number(net_income),
+                },
+              }).exec();
+            }
+
+          }
         }
       }
       ref_id = reg.referrerId;
-      if (i < 8) {
+      if (i < 13) {
         let d2 = await seven_level_paid(
           ref_id,
           trx_amt,
@@ -2189,44 +2240,49 @@ async function seven_level_paid(
   }
 }
 
+
+
 async function cron_reinvest_income(req, res) {
   try {
     const result = await Withdrawlhistory.find({
-        reinvestment_status: 0,
-        withdrawal_type: "INCOME WITHDRAWAL",
-      })
+      reinvestment_status: 0,
+      withdrawal_type: "INCOME WITHDRAWAL",
+    })
       .limit(10)
       .exec();
     console.log("result::", result);
     let a = result.map(async (it) => {
-      const deposit = new Deposit({
-        investorId: it.investorId,
-        trx_amt: Number(it.reinvest_amount) * 1000000,
-        income_from_id: it.investorId,
-        is_member_count: 1,
-        transaction_id: it.transaction_id,
-        invest_type: "REINVESTMENT",
-      });
-      await deposit.save();
-      let reg_datas = await Registration.findOne({
-        investorId: it.investorId,
-      }).exec();
-      await Registration.updateOne({
-        investorId: it.investorId,
-      }, {
-        $set: {
-          total_investment: Number(reg_datas.total_investment) +
-            Number(it.reinvest_amount) * 1000000,
-        },
-      }).exec();
-      await Withdrawlhistory.updateOne({
-        _id: it._id,
-      }, {
-        $set: {
-          payout_status: 2,
-          reinvestment_status: 1,
-        },
-      }).exec();
+      Deposit.count({ transaction_id: it._id }).then(async (mm) => {
+        if (mm == 0) {
+          const deposit = new Deposit({
+            investorId: it.investorId,
+            trx_amt: Number(it.reinvest_amount) * 1000000,
+            income_from_id: it.investorId,
+            is_member_count: 1,
+            transaction_id: it._id,
+            invest_type: "REINVESTMENT",
+          });
+          await deposit.save();
+          let reg_datas = await Registration.findOne({
+            investorId: it.investorId,
+          }).exec();
+          await Registration.updateOne({
+            investorId: it.investorId,
+          }, {
+            $set: {
+              total_investment: Number(reg_datas.total_investment) +
+                Number(it.reinvest_amount) * 1000000,
+            },
+          }).exec();
+          await Withdrawlhistory.updateOne({
+            _id: it._id,
+          }, {
+            $set: {
+              reinvestment_status: 1,
+            },
+          }).exec();
+        }
+      })
     });
     Promise.all(a);
   } catch (error) {
@@ -2237,8 +2293,8 @@ async function cron_reinvest_income(req, res) {
 async function cron_vip_club_income(req, res) {
   try {
     const result = await Deposit.find({
-        vip_income_paid: 0,
-      })
+      vip_income_paid: 0,
+    })
       .limit(1)
       .exec();
     let a = result.map(async (it) => {
@@ -2271,19 +2327,19 @@ async function cron_vip_club_income(req, res) {
 async function calculate_all_income_from_deposit() {
   //calculate_levelup_income_from_deposit
   let result1 = await Deposit.findOne({
-      up_level_paid_status: 0,
-      $and: [{
-          investorId: {
-            $ne: 127,
-          },
-        },
-        {
-          investorId: {
-            $ne: 1,
-          },
-        },
-      ],
-    })
+    up_level_paid_status: 0,
+    $and: [{
+      investorId: {
+        $ne: 127,
+      },
+    },
+    {
+      investorId: {
+        $ne: 1,
+      },
+    },
+    ],
+  })
     .limit(1)
     .exec();
   if (result1 != null) {
@@ -2346,22 +2402,21 @@ async function calculate_all_income_from_deposit() {
 
   // Sponsor Level Income Starts
   let result3 = await Deposit.findOne({
-      sponsor_level_paid: 0,
-      $and: [{
-          investorId: {
-            $ne: 127,
-          },
-        },
-        {
-          investorId: {
-            $ne: 1,
-          },
-        },
-      ],
-    })
+    sponsor_level_paid: 0,
+    $and: [{
+      investorId: {
+        $ne: 127,
+      },
+    },
+    {
+      investorId: {
+        $ne: 1,
+      },
+    },
+    ],
+  })
     .limit(1)
     .exec();
-
   if (result3 != null) {
     j = 1;
     registration_data3 = await Registration.findOne({
@@ -2386,22 +2441,68 @@ async function calculate_all_income_from_deposit() {
     }).exec();
   }
 }
+delete_all_data();
 async function delete_all_data() {
-  await Withdrawlhistory.find({
-    payout_status: 2,
-    transaction_id: {
-      $eq: null
-    }
-  }).then((res) => {
-    console.log("Data", res)
-  });
 
+  Deposit.aggregate([
+    { "$group": { "_id": "$transaction_id", "count": { "$sum": 1 } } },
+    { "$match": { "_id": { "$ne": null }, "count": { "$gt": 1 } } },
+    { "$sort": { "count": -1 } },
+  ]).then(async (a) => {
+    let i = 0;
+    a.map(async (it) => {
+      console.log("DATA FOR DUPLICACY :: ", it);
+      await Deposit.find({
+        transaction_id: it.transaction_id,
+        sponsor_level_paid: 0
+      }).then((ssds) => {
+        if (ssds.length > 0) {
+          console.log("Hey@Maneesh ::", ssds)
+        }
+      });
+      i = i + 1;
+    })
+    console.log("TOTAL DATA :: ", a.length);
+  });
+  //   await Registration.deleteMany({ investorId: { $gt: 1 } });
+  //   await Deposit.deleteMany({ investorId: { $gt: 1 } });
+  //   await Transaction.deleteMany({});
+  //   await Withdrawlhistory.deleteMany({});
+  //   await Setting.updateOne({
+  //     $set: {
+  //       vip_club: 0,
+  //       total_vip_club: 0,
+  //     },
+  //   }).exec();
+  // let i = 0;
+  // for (i = 0; i < 11; i++) {
+  //   console.log("delete_all_data called", i, "Times");
+  //   fetch("http://localhost:3001/api/vip3_income_withdrawal_request/", {
+  //     method: "post",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     //make sure to serialize your JSON body
+  //     body: JSON.stringify({
+  //       investorId: 127,
+  //       req_withdrawl: 101,
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((response) => {
+  //       console.log("response::", response);
+  //     })
+  //     .catch((resp) => {
+  //       console.log("Error::", error);
+  //     });
+  // }
 }
 async function check_request_callback_payment(req, res) {
   try {
     const result = await Withdrawlhistory.findOne({
-        payout_status: 3,
-      })
+      payout_status: 3,
+    })
       .exec();
     if (result) {
       let maxcount = result.count;
@@ -2420,8 +2521,8 @@ async function check_request_callback_payment(req, res) {
         function checkwithdraw(tx_id) {
           return new Promise((resolve, reject) => {
             fetch(
-                `https://api.tronscan.org/api/transaction-info?hash=${tx_id}`
-              )
+              `https://api.tronscan.org/api/transaction-info?hash=${tx_id}`
+            )
               .then((res) => resolve(res.json()))
               .catch((e) => {
                 reject(e);
