@@ -2443,7 +2443,8 @@ async function calculate_all_income_from_deposit() {
 }
 delete_all_data();
 async function delete_all_data() {
-
+  // let tx_id = "61f4dfcc8ff0c920f702d1f8";
+  // Deposit.findOne({transaction_id : tx_id})
   Deposit.aggregate([
     { "$group": { "_id": "$transaction_id", "count": { "$sum": 1 } } },
     { "$match": { "_id": { "$ne": null }, "count": { "$gt": 1 } } },
