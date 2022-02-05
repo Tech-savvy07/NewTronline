@@ -2441,7 +2441,7 @@ async function calculate_all_income_from_deposit() {
     }).exec();
   }
 }
-delete_all_data();
+
 async function delete_all_data() {
   // let tx_id = "61f4dfcc8ff0c920f702d1f8";
   // Deposit.findOne({transaction_id : tx_id})
@@ -2499,6 +2499,7 @@ async function delete_all_data() {
   //     });
   // }
 }
+
 async function check_request_callback_payment(req, res) {
   try {
     const result = await Withdrawlhistory.findOne({
@@ -2571,7 +2572,6 @@ async function check_request_callback_payment(req, res) {
 module.exports = {
   calculate_leveldown_income_from_deposit,
   calculate_levelup_income_from_deposit,
-  // calculate_level_income_from_deposit,
   calculate_all_income_from_deposit,
   vip1_income_withdrawal_request,
   vip2_income_withdrawal_request,
