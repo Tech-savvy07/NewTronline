@@ -1237,12 +1237,14 @@ export default function Home() {
 
             <>
               <div className="row cus_row">
-                <div className="col-md-6 col-sm-6 col-6">
+                <div className="col-md-6 col-sm-6 col-12">
                   <div className="Personal_Details_inner">
                     <h3>Sponosor Count before 14th Feb</h3>
                     <div className="row cus_row">
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>500 TRX</h4>
                           <h5>
                             {getSponsorCount ?
@@ -1253,8 +1255,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>2000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
@@ -1265,8 +1269,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>5000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
@@ -1277,8 +1283,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>10000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
@@ -1306,12 +1314,14 @@ export default function Home() {
                 </h5> */}
                   </div>
                 </div>
-                <div className="col-md-6 col-sm-6 col-6">
+                <div className="col-md-6 col-sm-6 col-12">
                   <div className="Personal_Details_inner">
                     <h3>Sponosor Count after 14th Feb</h3>
                     <div className="row cus_row">
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>500 TRX</h4>
                           <h5>
                             {getSponsorCount ?
@@ -1322,8 +1332,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>2000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
@@ -1334,8 +1346,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>5000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
@@ -1346,8 +1360,10 @@ export default function Home() {
                           </h5>
                         </div>
                       </div>
-                      <div className="col-md-3 col-sm-3 col-3">
-                        <div className="Personal_Details_inner">
+                      <div className="col-md-3 col-sm-3 col-12">
+                        <div className="Personal_Details_inner" style={{
+                          boxShadow: "rgb(0 0 0 / 54%) 4px 0px 33px 0px"
+                        }}>
                           <h4>10000 TRX </h4>
                           <h5>
                             {getSponsorCount ?
