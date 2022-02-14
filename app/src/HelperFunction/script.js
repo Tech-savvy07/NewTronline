@@ -25,7 +25,7 @@ export function getBalance(address) {
       })
       .catch((e) => {
         console.log(e);
-      });    
+      });
   };
 }
 
@@ -191,6 +191,22 @@ export function getWithdrawCondition(id) {
     .catch((e) => e);
 }
 
+export function getSponsorCountAPI(id) {
+  return fetch(`${url}/getSponsorCount`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "cache-control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({
+      investorId: id,
+    }),
+  })
+    .then((d) => d.json())
+    .catch((e) => e);
+}
+
 export function getInvestorId(id) {
   return fetch(`${url}/get_investorId`, {
     method: "POST",
@@ -269,6 +285,21 @@ export function getLevelIncomes(id, type) {
     .catch((e) => e);
 }
 
+export function getSiteData() {
+  return fetch(`${url}/getSiteData`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "cache-control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({
+    }),
+  })
+    .then((d) => d.json())
+    .catch((e) => e);
+}
+
 export function getMyWalletIncome(address) {
   return fetch(`${url}/getWalletBalance`, {
     method: "POST",
@@ -296,7 +327,7 @@ export function withdrawalRequest(withdrawal_amount, id, waddress) {
     body: JSON.stringify({
       withdrawl_amount: withdrawal_amount,
       investorId: id,
-      waddress:waddress,
+      waddress: waddress,
     }),
   })
     .then((d) => d.json())

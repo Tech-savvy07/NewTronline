@@ -4,12 +4,33 @@ import { NotificationContainer } from "react-notifications";
 import Home from "./pages/Home";
 import AccountSummary from "./pages/AccountSummary";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { getSiteData } from "./HelperFunction/script";
+import { useDispatch } from "react-redux";
+import { SET_SITE_DATA } from "./redux/constant";
+import { useEffect } from "react";
 
 function App() {
-  const mt = false;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    function getSiteDatas() {
+      getSiteData()
+        .then((result) => {
+          if (result.status) {
+            dispatch({ type: SET_SITE_DATA, data: result.data });
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+    getSiteDatas();
+  }, []);
+
+  const maintenance = true;
   return (
     <div className="App">
-      {!mt ? (
+      {!maintenance ? (
         <div
           style={{
             position: "absolute",
@@ -41,18 +62,6 @@ function App() {
                 exact
                 path="/accountsummary"
                 element={<AccountSummary />}
-              />
-              <Route
-                exact
-                path="/iframe"
-                element={
-                  <iframe
-                    src="http://localhost:3000?TKij1kzMtCU2sSMzwJR3SteJQwcqXogKBD"
-                    title="W3Schools Free Online Web Tutorials"
-                    id="iframe_id"
-                    style={{ height: "1000px", width: "100%" }}
-                  ></iframe>
-                }
               />
             </Routes>
           </BrowserRouter>

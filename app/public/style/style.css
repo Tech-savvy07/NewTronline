@@ -2,11 +2,13 @@
   .vimg {
     width: 60% !important;
   }
-  .tirw{
-      font-size: 27px !important;
+
+  .tirw {
+    font-size: 27px !important;
   }
-  .grad_btn{
-      padding: 10px 30px !important;
+
+  .grad_btn {
+    padding: 10px 30px !important;
   }
 }
 
@@ -14,4 +16,19 @@
   .vimg {
     width: 80% !important;
   }
+}
+
+/* .data-table-extensions{
+  background: linear-gradient(to right, #191b1b, #242327);
+} */
+.filter-text {
+  color: white;
+}
+
+.marquee-glow {
+  box-shadow: 0 0 25px 10px #fff,
+    /* inner white */
+    0 0 43px 8px #f0f,
+    /* middle magenta */
+    0 0 16px 11px #0ff;
 }

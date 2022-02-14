@@ -17,6 +17,7 @@ import {
   INVESTOR_ID,
   SET_PERSONAL_DETAILS,
   SET_WITHDRAW_CONDITIONS,
+  SET_SITE_DATA,
 } from "./constant";
 
 const initialState = {
@@ -40,6 +41,7 @@ const initialState = {
   withdrawal_history: [],
   vip_withdrawal_history: [],
   all_up_down_income: [],
+  siteData: [],
   personaldetails: {},
   withdraw_condition: {
     invest: 0,
@@ -53,6 +55,12 @@ const appStore = (state = initialState, action) => {
       return {
         ...state,
         wallet_address: action.data,
+      };
+
+    case SET_SITE_DATA:
+      return {
+        ...state,
+        siteData: action.data,
       };
 
     case SET_LOGGEDIN:

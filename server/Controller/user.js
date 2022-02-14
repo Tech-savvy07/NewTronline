@@ -296,6 +296,87 @@ async function getWithdrawal(req, res) {
   }
 }
 
+async function getSponsorCount(req, res) {
+  try {
+    let after_500 = 0;
+    let after_2000 = 0;
+    let after_5000 = 0;
+    let after_10000 = 0;
+    let before_500 = 0;
+    let before_2000 = 0;
+    let before_5000 = 0;
+    let before_10000 = 0;
+    const investorId = req.body.investorId ? req.body.investorId : "";
+    await Registration.find({
+      referrerId: investorId,
+    }).then((data) => {
+      if (data) {
+        before_500 = data.length;
+        let a = data.map(async (it) => {
+          if (it.createdAt >= "2022-02-14T00:00:00") {
+            after_500 = after_500 + 1;
+            if (it.vip1) {
+              after_2000 = after_2000 + 1;
+            }
+            if (it.vip2) {
+              after_5000 = after_5000 + 1;
+            }
+            if (it.vip3) {
+              after_10000 = after_10000 + 1;
+            }
+          }
+          if (it.vip1) {
+            before_2000 = before_2000 + 1;
+          }
+          if (it.vip2) {
+            before_5000 = before_5000 + 1;
+          }
+          if (it.vip3) {
+            before_10000 = before_10000 + 1;
+          }
+        });
+        Promise.all(a).then(() => {
+          res.status(200).json({
+            status: true,
+            after_500: after_500,
+            after_2000: after_2000,
+            after_5000: after_5000,
+            after_10000: after_10000,
+            before_500: before_500,
+            before_2000: before_2000,
+            before_5000: before_5000,
+            before_10000: before_10000,
+          });
+        })
+      }
+    });
+    // console.log(reg);
+  } catch (error) {
+    console.log("Error in getSponsorCount", error.message);
+  }
+}
+
+async function getSiteData(req, res) {
+  try {
+
+    await SiteData.find({}, "promotion_status promotion_msg").then((data) => {
+      if (data) {
+        res.status(200).json({
+          status: true,
+          data: data,
+        });
+      }
+    }).catch(() => {
+      return res.status(400).json({
+        status: false,
+        message: "Something went wrong, contact support team for more information!",
+      });
+    });
+  } catch (error) {
+    console.log("Error in getSiteData", error.message);
+  }
+}
+
 async function getWithdrawalConditions(req, res) {
   try {
     const investorId = req.body.investorId;
@@ -2699,6 +2780,7 @@ module.exports = {
   get_direct_member,
   personal_details,
   getWalletBalance,
+  getSponsorCount,
   delete_all_data,
   get_investorId,
   getWithdrawal,

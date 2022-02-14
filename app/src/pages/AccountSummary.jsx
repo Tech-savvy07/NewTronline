@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import DataTableExtensions from 'react-data-table-component-extensions';
+import 'react-data-table-component-extensions/dist/index.css';
+
 import {
   getInvestorId,
   getvipsponsorincome,
@@ -44,22 +47,6 @@ export default function AccountSummary() {
       },
     },
 
-    // {
-    //   name: "Transaction Id",
-    //   selector: (row) => (
-    //     <a
-    //       href={`https://tronscan.io/#/transaction/${row.transaction_id}`}
-    //       target="_blank"
-    //     >
-    //       {row.transaction_id}
-    //     </a>
-    //   ),
-    //   sortable: true,
-    //   style: {
-    //     backgroundColor: "transparent",
-    //     color: "black",
-    //   },
-    // },
     {
       name: "Reward",
       selector: (row) => row.total_income + " TRX",
@@ -84,17 +71,17 @@ export default function AccountSummary() {
       name: "Transaction Id",
       selector: (row) => (
         <div>
-        {row.transaction_id ? (
-          <a
-            href={`https://tronscan.io/#/transaction/${row.transaction_id}`}
-            target="_blank"
-          >
-            {row.transaction_id}
-          </a>
-        ) : (
-          <span class="badge bg-warning text-dark p-2 px-4" style={{fontSize:"12px"}}>Pending</span>
-        )}
-      </div>
+          {row.transaction_id ? (
+            <a
+              href={`https://tronscan.io/#/transaction/${row.transaction_id}`}
+              target="_blank"
+            >
+              {row.transaction_id}
+            </a>
+          ) : (
+            <span class="badge bg-warning text-dark p-2 px-4" style={{ fontSize: "12px" }}>Pending</span>
+          )}
+        </div>
       ),
       sortable: true,
       style: {
@@ -131,7 +118,7 @@ export default function AccountSummary() {
     },
     {
       name: "Approved At",
-      selector: (row) => row.block_timestamp?new Date(row.block_timestamp).toLocaleString():"---",
+      selector: (row) => row.block_timestamp ? new Date(row.block_timestamp).toLocaleString() : "---",
       sortable: true,
       style: {
         backgroundColor: "transparent",
@@ -190,7 +177,7 @@ export default function AccountSummary() {
               {row.transaction_id}
             </a>
           ) : (
-            <span class="badge bg-warning text-dark p-2 px-4" style={{fontSize:"12px"}}>Pending</span>
+            <span class="badge bg-warning text-dark p-2 px-4" style={{ fontSize: "12px" }}>Pending</span>
           )}
         </div>
       ),
@@ -227,7 +214,7 @@ export default function AccountSummary() {
         color: "rgba(63, 195, 128, 0.9)",
       },
     },
-    
+
     {
       name: "Requested Time",
       selector: (row) => new Date(row.createdAt).toLocaleString(),
@@ -239,7 +226,7 @@ export default function AccountSummary() {
     },
     {
       name: "Approved At",
-      selector: (row) =>row.transaction_id? row.block_timestamp?new Date(row.block_timestamp).toLocaleString():"---":"---",
+      selector: (row) => row.transaction_id ? row.block_timestamp ? new Date(row.block_timestamp).toLocaleString() : "---" : "---",
       sortable: true,
       style: {
         backgroundColor: "transparent",
@@ -501,14 +488,23 @@ export default function AccountSummary() {
           </div>
           <div class="">
             <div class="table_inner">
-              <DataTable
+              <DataTableExtensions
+                export={false}
                 columns={updowncoloumns}
                 data={state.all_up_down_income}
-                pagination
-                paginationPerPage={5}
-                progressPending={false}
-                customStyles={customStyles}
-              />
+                exportHeaders
+              >
+                <DataTable
+                  columns={updowncoloumns}
+                  // subHeaderComponent={filterUI}
+                  data={state.all_up_down_income}
+                  pagination
+                  paginationPerPage={5}
+                  progressPending={false}
+                  customStyles={customStyles}
+                />
+              </DataTableExtensions>
+
             </div>
           </div>
         </div>
@@ -523,14 +519,22 @@ export default function AccountSummary() {
           </div>
           <div class="">
             <div class="table_inner">
-              <DataTable
+              <DataTableExtensions
+                export={false}
                 columns={directcolumns}
                 data={state.mydirect}
-                pagination
-                paginationPerPage={3}
-                progressPending={false}
-                customStyles={customStyles}
-              />
+                exportHeaders
+              >
+                <DataTable
+                  columns={directcolumns}
+                  data={state.mydirect}
+                  pagination
+                  paginationPerPage={3}
+                  progressPending={false}
+                  customStyles={customStyles}
+                />
+              </DataTableExtensions>
+
             </div>
           </div>
         </div>
@@ -545,14 +549,21 @@ export default function AccountSummary() {
           </div>
           <div class="">
             <div class="table_inner">
-              <DataTable
+              <DataTableExtensions
+                export={false}
                 columns={mywithdrawcolumns}
                 data={state.withdrawal_history}
-                pagination
-                paginationPerPage={3}
-                progressPending={false}
-                customStyles={customStyles}
-              />
+                exportHeaders
+              >
+                <DataTable
+                  columns={mywithdrawcolumns}
+                  data={state.withdrawal_history}
+                  pagination
+                  paginationPerPage={3}
+                  progressPending={false}
+                  customStyles={customStyles}
+                />
+              </DataTableExtensions>
             </div>
           </div>
         </div>
@@ -567,14 +578,21 @@ export default function AccountSummary() {
           </div>
           <div class="">
             <div class="table_inner">
-              <DataTable
+              <DataTableExtensions
+                export={false}
                 columns={sponcercolumns}
                 data={myvipsponsor}
-                pagination
-                paginationPerPage={3}
-                progressPending={false}
-                customStyles={customStyles}
-              />
+                exportHeaders
+              >
+                <DataTable
+                  columns={sponcercolumns}
+                  data={myvipsponsor}
+                  pagination
+                  paginationPerPage={3}
+                  progressPending={false}
+                  customStyles={customStyles}
+                />
+              </DataTableExtensions>
             </div>
           </div>
         </div>
@@ -589,6 +607,12 @@ export default function AccountSummary() {
           </div>
           <div class="">
             <div class="table_inner">
+              <DataTableExtensions
+                export={false}
+                columns={vipwithdrawcolumns}
+                data={state.vip_withdrawal_history}
+                exportHeaders
+              >
               <DataTable
                 columns={vipwithdrawcolumns}
                 data={state.vip_withdrawal_history}
@@ -597,6 +621,7 @@ export default function AccountSummary() {
                 progressPending={false}
                 customStyles={customStyles}
               />
+              </DataTableExtensions>
             </div>
           </div>
         </div>

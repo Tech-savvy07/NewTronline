@@ -25,6 +25,7 @@ const {
   get_activated_vip,
   personal_details,
   getWalletBalance,
+  getSponsorCount,
   delete_all_data,
   get_investorId,
   is_user_exist,
@@ -63,6 +64,7 @@ router.post("/get_direct_member", get_direct_member);
 router.post("/get_activated_vip", get_activated_vip);
 router.post("/personal_details", personal_details);
 router.post("/getWalletBalance", getWalletBalance);
+router.post("/getSponsorCount", getSponsorCount);
 router.post("/kiosk_reqst", withdrawal_request);
 router.post("/get_investorId", get_investorId);
 router.post("/getWithdrawal", getWithdrawal);

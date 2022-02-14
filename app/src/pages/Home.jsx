@@ -3,6 +3,8 @@ import DataTable from "react-data-table-component";
 import { NotificationManager } from "react-notifications";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Marquee from "react-fast-marquee";
+import DataTableExtensions from 'react-data-table-component-extensions';
 import CardIdinfo from "../Component/Card_Id_info";
 import { BsTelegram } from "react-icons/bs";
 import { BiSupport } from "react-icons/bi";
@@ -21,6 +23,7 @@ import {
   getVIPCount,
   getwalletAddress,
   getWithdrawCondition,
+  getSponsorCountAPI,
   vipWithdrawalRequest1,
   vipWithdrawalRequest2,
   vipWithdrawalRequest3,
@@ -46,6 +49,7 @@ export default function Home() {
   const dispatch = useDispatch();
   const state = useSelector((state) => state.appStore);
   const [pkg500, setpkg500] = useState(0);
+  const [getSponsorCount, setSponsorCount] = useState([]);
   const [joinAmount, setjoinAmount] = useState(0);
   const [vip1, setvip1] = useState(0);
   const [vip2, setvip2] = useState(0);
@@ -139,7 +143,6 @@ export default function Home() {
   function walletIncome() {
     getMyWalletIncome(state.wallet_address)
       .then((res) => {
-        console.log("mywallet balance: ", res);
         dispatch({ type: WALLET_INCOME, data: res.data.data });
         dispatch({ type: VIP_INCOME, data: res.data.vip_incomes });
         dispatch({
@@ -156,7 +159,6 @@ export default function Home() {
   function loginStatus() {
     checkLoginStatus(state.wallet_address)
       .then((res) => {
-        console.log("login state", res);
         dispatch({
           type: SET_LOGGEDIN,
           data: res.data === 1 ? true : false,
@@ -170,14 +172,12 @@ export default function Home() {
   function randomId() {
     getRandomId(state.wallet_address)
       .then((res) => {
-        console.log("random_id: ", res);
         if (res.status) {
           dispatch({ type: REF_ID, data: res.data });
           setref_id(res.data);
         } else {
           dispatch({ type: REF_ID, data: res.data });
           setref_id(res.status);
-          console.log("data");
         }
         // dispatch({ type: SET_LOGGEDIN, data: Number(res.data) });
       })
@@ -215,7 +215,6 @@ export default function Home() {
   function checkVIP() {
     getVIP(state.investor_id)
       .then((res) => {
-        console.log("res of vip: ", res);
         if (res.status) {
           setvipdata(res.data);
           setbtndis({
@@ -262,10 +261,8 @@ export default function Home() {
     if (!state.isLoggedIn) {
       dispatch({ type: SET_PERSONAL_DETAILS, data: {} });
     }
-    console.log("per det state::", state.wallet_address, state.investor_id);
     getPersonalDetails(state.investor_id)
       .then((result) => {
-        console.log("personal det: ", result);
         if (result.status) {
           dispatch({ type: SET_PERSONAL_DETAILS, data: result.data });
           // setpersonaldetails(state.personalDetails);
@@ -280,7 +277,6 @@ export default function Home() {
     if (state.investor_id) {
       getCommunityDetails(state.investor_id)
         .then((result) => {
-          console.log("community det: ", result);
 
           if (result.status) {
             dispatch({
@@ -311,7 +307,6 @@ export default function Home() {
   function getWithdrawConditions() {
     getWithdrawCondition(state.investor_id)
       .then((result) => {
-        console.log("w cond: : ", result);
         if (result.status) {
           dispatch({ type: SET_WITHDRAW_CONDITIONS, data: result.data });
           // setpersonaldetails(state.personalDetails);
@@ -321,11 +316,22 @@ export default function Home() {
         console.log(e);
       });
   }
+
+  function getSponsorCounts() {
+    getSponsorCountAPI(state.investor_id)
+      .then((result) => {
+        if (result.status) {
+          // dispatch({ type: SET_SPONSOR_COUNT, data: result });
+          setSponsorCount(result);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
   useEffect(() => {
     const url_address = window?.frames?.location?.href;
-    // console.log("url address: ", url_address.split("?"), window);
     const url = url_address ? url_address.split("?")[1] : "";
-    console.log("embue1::", url);
     if (url && url.length > 21) {
       dispatch({ type: SET_ADDRESS, data: url });
     } else {
@@ -333,7 +339,6 @@ export default function Home() {
     }
     if (ref_addr.indexOf("ref_id=") !== -1) {
       const ref_ad = ref_addr.split("=");
-      console.log("rad: ", ref_ad[1]);
       setref_id1(ref_ad[1]);
     }
     vipCount();
@@ -366,6 +371,7 @@ export default function Home() {
     if (state.wallet_address) {
       loginStatus();
       randomId();
+      getSponsorCounts();
       vipCount();
       checkVIP();
       walletIncome();
@@ -373,7 +379,6 @@ export default function Home() {
       getCurrentInvestorId();
       const url_address = window?.frames?.location?.href;
       const url = url_address ? url_address.split("?")[1] : "";
-      // console.log("url address: ", url.indexOf(""), window);
       if (url && url.length > 21) {
         dispatch({ type: SET_ADDRESS, data: url });
       } else {
@@ -518,7 +523,6 @@ export default function Home() {
                 let investor = response.data;
                 if (response.status) {
                   checkJoinAddress(state.wallet_address).then((res) => {
-                    console.log("res true: ", res);
                     if (!res.data) {
                       window.contract
                         .UserRegister(state.wallet_address, investor)
@@ -527,7 +531,6 @@ export default function Home() {
                           feeLimit: 50000000,
                         })
                         .then(function (tx) {
-                          console.log("tx: ", tx);
                           setspin("");
                           setdisable(false);
                           setjoinAmount(0);
@@ -738,6 +741,7 @@ export default function Home() {
     }
   }
 
+
   function vip3withdraw() {
     if (Number(state?.vip_income?.vip3_wallet) >= Number(vipwithdraw_amt3)) {
       if (vipwithdraw_amt3 > 0) {
@@ -837,7 +841,7 @@ export default function Home() {
       NotificationManager.error("Please Select Deactive packages !!");
     }
   }
-  
+
 
   return (
     <>
@@ -887,6 +891,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {state.siteData.promotion_status == 1 ?
+        <Marquee speed={130} pauseOnHover gradientWidth={0} className="text-light marquee-glow" style={{
+          fontSize: '22px',
+          background: '#ffffff33',
+          boxShadow: '1px 1px 1px s'
+        }} >
+          {state.siteData.promotion_msg}
+        </Marquee> : null}
 
       <section className="banner_section pt_50 pb_50 mt-5">
         <div className="container">
@@ -965,8 +977,8 @@ export default function Home() {
                 <span style={{ fontSize: "15px" }}>
                   {state.wallet_address
                     ? state.wallet_address.substr(0, 10) +
-                      "......." +
-                      state.wallet_address.substr(25)
+                    "......." +
+                    state.wallet_address.substr(25)
                     : "Press Refresh for Wallet Address if Tronlink is connected"}
                 </span>{" "}
               </h6>
@@ -1048,9 +1060,8 @@ export default function Home() {
                 <>
                   <div className="col-lg-2 col-md-3 col-sm-12">
                     <button
-                      className={`btn  my-2 ${vip1 === 2000 ? "bg-info" : ""} ${
-                        btndis?.vip1 ? "btn-success" : "btn-light"
-                      }`}
+                      className={`btn  my-2 ${vip1 === 2000 ? "bg-info" : ""} ${btndis?.vip1 ? "btn-success" : "btn-light"
+                        }`}
                       style={{ width: "100%" }}
                       onClick={() => {
                         if (!btndis?.vip1) {
@@ -1080,9 +1091,8 @@ export default function Home() {
                   </div>
                   <div className="col-lg-2 col-md-3 col-sm-12">
                     <button
-                      className={`btn  my-2 ${vip2 === 5000 ? "bg-info" : ""} ${
-                        btndis?.vip2 ? "btn-success" : "btn-light"
-                      }`}
+                      className={`btn  my-2 ${vip2 === 5000 ? "bg-info" : ""} ${btndis?.vip2 ? "btn-success" : "btn-light"
+                        }`}
                       style={{ width: "100%" }}
                       onClick={() => {
                         if (!btndis?.vip2) {
@@ -1112,9 +1122,8 @@ export default function Home() {
                   </div>
                   <div className="col-lg-2 col-md-3 col-sm-12">
                     <button
-                      className={`btn  my-2 ${
-                        vip3 === 10000 ? "bg-info" : ""
-                      } ${btndis?.vip3 ? "btn-success" : "btn-light"}`}
+                      className={`btn  my-2 ${vip3 === 10000 ? "bg-info" : ""
+                        } ${btndis?.vip3 ? "btn-success" : "btn-light"}`}
                       style={{ width: "100%" }}
                       onClick={() => {
                         if (!btndis?.vip3) {
@@ -1163,9 +1172,8 @@ export default function Home() {
                 <>
                   <div className="col-lg-2 col-md-3 col-sm-12">
                     <button
-                      className={`btn btn-light my-2 ${
-                        pkg500 === 500 ? "bg-info" : ""
-                      }`}
+                      className={`btn btn-light my-2 ${pkg500 === 500 ? "bg-info" : ""
+                        }`}
                       style={{ width: "100%" }}
                       onClick={() => {
                         setpkg500(500);
@@ -1224,6 +1232,152 @@ export default function Home() {
 
       <div className="mt-5">
         <div className="container">
+          {/* Extra row */}
+          {state.siteData.sponsor_count_promotion ? state.siteData.sponsor_count_promotion == 1 ?
+
+            <>
+              <div className="row cus_row">
+                <div className="col-md-6 col-sm-6 col-6">
+                  <div className="Personal_Details_inner">
+                    <h3>Sponosor Count before 14th Feb</h3>
+                    <div className="row cus_row">
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>500 TRX</h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.before_500 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>2000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.before_2000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>5000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.before_5000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>10000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.before_10000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* <h5>
+                  {state
+                    ? state.investor_id > 0
+                      ? state.personaldetails
+                        ? state.personaldetails.total_reinvest
+                          ? (
+                            Number(state.personaldetails.total_reinvest) / 1e6
+                          ).toFixed(2) + " TRX"
+                          : 0 + " TRX"
+                        : 0 + " TRX"
+                      : 0 + " TRX"
+                    : 0 + " TRX"}
+                </h5> */}
+                  </div>
+                </div>
+                <div className="col-md-6 col-sm-6 col-6">
+                  <div className="Personal_Details_inner">
+                    <h3>Sponosor Count after 14th Feb</h3>
+                    <div className="row cus_row">
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>500 TRX</h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.after_500 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>2000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.after_2000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>5000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.after_5000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                      <div className="col-md-3 col-sm-3 col-3">
+                        <div className="Personal_Details_inner">
+                          <h4>10000 TRX </h4>
+                          <h5>
+                            {getSponsorCount ?
+                              getSponsorCount.status ?
+                                getSponsorCount.after_10000 + " Member"
+                                : 0
+                              : 0}
+                          </h5>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* <h5>
+                  {state
+                    ? state.investor_id > 0
+                      ? state.personaldetails
+                        ? state.personaldetails.total_reinvest
+                          ? (
+                            Number(state.personaldetails.total_reinvest) / 1e6
+                          ).toFixed(2) + " TRX"
+                          : 0 + " TRX"
+                        : 0 + " TRX"
+                      : 0 + " TRX"
+                    : 0 + " TRX"}
+                </h5> */}
+                  </div>
+                </div>
+              </div>
+            </> : null : null}
+
           <div className="row cus_row">
             <CardIdinfo
               CommunityLevel="Community Level Rewards"
@@ -1241,6 +1395,7 @@ export default function Home() {
               trx={state.balance}
             />
           </div>
+
         </div>
       </div>
 
@@ -1356,11 +1511,11 @@ export default function Home() {
           <div className="sm_container">
             {/* first row */}
             <div className="row">
-               <div className="col-12 d-flex justify-content-center my-2">
-                     {/* <div className="rlt">
+              <div className="col-12 d-flex justify-content-center my-2">
+                {/* <div className="rlt">
                         Time to release vip's income : <Counter time={new Date().getTime()} cb={() => { }} />
                      </div> */}
-               </div>
+              </div>
             </div>
             <div className="row">
               <div className="col-lg-4 col-md-4 col-sm-12">
@@ -1377,10 +1532,10 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data?.vip_club
                         ? (
-                            (Number(count.setting_data.vip_club) * 15) /
-                            100 /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 15) /
+                          100 /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1395,11 +1550,11 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data?.vip_club && count.total_vip1
                         ? (
-                            (Number(count.setting_data.vip_club) * 15) /
-                            100 /
-                            Number(count.total_vip1) /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 15) /
+                          100 /
+                          Number(count.total_vip1) /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1416,10 +1571,10 @@ export default function Home() {
                         ? state.personaldetails
                           ? state.personaldetails.remain_vip1_income
                             ? (
-                                Number(
-                                  state.personaldetails.remain_vip1_income
-                                ) / 1e6
-                              ).toFixed(2) + " TRX"
+                              Number(
+                                state.personaldetails.remain_vip1_income
+                              ) / 1e6
+                            ).toFixed(2) + " TRX"
                             : 0 + " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
@@ -1441,10 +1596,10 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data?.vip_club
                         ? (
-                            (Number(count.setting_data.vip_club) * 35) /
-                            100 /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 35) /
+                          100 /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1459,11 +1614,11 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data?.vip_club && count.total_vip2
                         ? (
-                            (Number(count.setting_data.vip_club) * 35) /
-                            100 /
-                            Number(count.total_vip2) /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 35) /
+                          100 /
+                          Number(count.total_vip2) /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1480,10 +1635,10 @@ export default function Home() {
                         ? state.personaldetails
                           ? state.personaldetails.remain_vip2_income
                             ? (
-                                Number(
-                                  state.personaldetails.remain_vip2_income
-                                ) / 1e6
-                              ).toFixed(2) + " TRX"
+                              Number(
+                                state.personaldetails.remain_vip2_income
+                              ) / 1e6
+                            ).toFixed(2) + " TRX"
                             : 0 + " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
@@ -1505,10 +1660,10 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data?.vip_club
                         ? (
-                            (Number(count.setting_data.vip_club) * 50) /
-                            100 /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 50) /
+                          100 /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1523,11 +1678,11 @@ export default function Home() {
                     {count?.setting_data
                       ? count.setting_data.vip_club && count.total_vip3
                         ? (
-                            (Number(count.setting_data.vip_club) * 50) /
-                            100 /
-                            Number(count.total_vip3) /
-                            1e6
-                          ).toFixed(2)
+                          (Number(count.setting_data.vip_club) * 50) /
+                          100 /
+                          Number(count.total_vip3) /
+                          1e6
+                        ).toFixed(2)
                         : 0
                       : 0}
                   </p>
@@ -1544,10 +1699,10 @@ export default function Home() {
                         ? state.personaldetails
                           ? state.personaldetails.remain_vip3_income
                             ? (
-                                Number(
-                                  state.personaldetails.remain_vip3_income
-                                ) / 1e6
-                              ).toFixed(2) + " TRX"
+                              Number(
+                                state.personaldetails.remain_vip3_income
+                              ) / 1e6
+                            ).toFixed(2) + " TRX"
                             : 0 + " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
@@ -2005,9 +2160,9 @@ export default function Home() {
                     ? state.investor_id > 0
                       ? state.personaldetails
                         ? state.personaldetails.total_deposited
-                          ? Number(state.personaldetails.total_deposited) /
-                              1e6 +
-                            " TRX"
+                          ? Number(Number(state.personaldetails.total_deposited) /
+                            1e6).toFixed(2) +
+                          " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
                       : 0 + " TRX"
@@ -2023,8 +2178,8 @@ export default function Home() {
                     ? state.investor_id > 0
                       ? state.personaldetails
                         ? state.personaldetails.total_withdraw
-                          ? Number(state.personaldetails.total_withdraw) +
-                            " TRX"
+                          ? Number(Number(state.personaldetails.total_withdraw)).toFixed(2) +
+                          " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
                       : 0 + " TRX"
@@ -2049,6 +2204,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+
           {/* second row */}
           <div className="row cus_row">
             <div className="col-md-4 col-sm-4 col-6">
@@ -2060,8 +2216,8 @@ export default function Home() {
                       ? state.personaldetails
                         ? state.personaldetails.total_reinvest
                           ? (
-                              Number(state.personaldetails.total_reinvest) / 1e6
-                            ).toFixed(2) + " TRX"
+                            Number(state.personaldetails.total_reinvest) / 1e6
+                          ).toFixed(2) + " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
                       : 0 + " TRX"
@@ -2071,7 +2227,7 @@ export default function Home() {
             </div>
             <div className="col-md-4 col-sm-4 col-6">
               <div className="Personal_Details_inner">
-                <h4>My Directs </h4>
+                <h4>My Directs</h4>
                 <h5>
                   {state.personaldetails
                     ? state.investor_id > 0
@@ -2106,8 +2262,9 @@ export default function Home() {
                     ? state.investor_id > 0
                       ? state.personaldetails
                         ? state.personaldetails.income_withdraw
-                          ? Number(state.personaldetails.income_withdraw) +
-                            " TRX"
+                          ? Number(Number(state.personaldetails.income_withdraw)
+                          ).toFixed(2) +
+                          " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
                       : 0 + " TRX"
@@ -2123,8 +2280,9 @@ export default function Home() {
                     ? state.investor_id > 0
                       ? state.personaldetails
                         ? state.personaldetails.vip_withdraw
-                          ? Number(state.personaldetails.vip_withdraw) +
-                            " TRX"
+                          ? Number(Number(state.personaldetails.vip_withdraw)
+                          ).toFixed(2) +
+                          " TRX"
                           : 0 + " TRX"
                         : 0 + " TRX"
                       : 0 + " TRX"
@@ -2148,8 +2306,8 @@ export default function Home() {
                   {state.personaldetails
                     ? state.personaldetails.communitydeposit
                       ? (state.personaldetails.communitydeposit / 1e6).toFixed(
-                          0
-                        ) + " TRX"
+                        0
+                      ) + " TRX"
                       : 0
                     : 0}
                 </h5>
@@ -2162,7 +2320,7 @@ export default function Home() {
                   {state.personaldetails
                     ? state.personaldetails.communitywithdrawal
                       ? state.personaldetails.communitywithdrawal.toFixed(0) +
-                        " TRX"
+                      " TRX"
                       : 0
                     : 0}
                 </h5>
@@ -2212,22 +2370,25 @@ export default function Home() {
                         })
                         : null} */}
                       {state.community.leveldown &&
-                      state.community.leveldown.length > 0
+                        state.community.leveldown.length > 0
                         ? state.community.leveldown.map((item, i) => {
-                            return (
-                              <tr className="trrr">
-                                <td>
-                                  {item.level === 0
-                                    ? "SELF"
-                                    : "LEVEL" + item.level}
-                                </td>
-                                <td>{item.id}</td>
-                                <td>{item.deposit}</td>
-                                <td>{item.reinvest}</td>
-                                <td>{item.reinvestment}</td>
-                              </tr>
-                            );
-                          })
+                          return (
+                            <tr className="trrr">
+                              <td>
+                                {item.level === 0
+                                  ? "SELF"
+                                  : "LEVEL" + item.level}
+                              </td>
+                              <td>{item.id}</td>
+                              <td>{Number(item.deposit
+                              ).toFixed(2)} TRX</td>
+                              <td>{Number(item.reinvest
+                              ).toFixed(2)} TRX</td>
+                              <td>{Number(item.reinvestment
+                              ).toFixed(2)} TRX</td>
+                            </tr>
+                          );
+                        })
                         : null}
                     </tbody>
                   ) : (
@@ -2252,19 +2413,31 @@ export default function Home() {
           <div className="sm_container">
             <div className="table_inner">
               <div className="table-responsive gridtable">
-                <DataTable
+                <DataTableExtensions
+                  export={false}
                   columns={sponsorcolumn}
                   data={
                     state.community.sponsor_level &&
-                    state.community.sponsor_level.length !== 0
+                      state.community.sponsor_level.length !== 0
                       ? state.community.sponsor_level
                       : []
                   }
-                  pagination
-                  paginationPerPage={4}
-                  progressPending={false}
-                  customStyles={customStyles}
-                />
+                  exportHeaders
+                >
+                  <DataTable
+                    columns={sponsorcolumn}
+                    data={
+                      state.community.sponsor_level &&
+                        state.community.sponsor_level.length !== 0
+                        ? state.community.sponsor_level
+                        : []
+                    }
+                    pagination
+                    paginationPerPage={4}
+                    progressPending={false}
+                    customStyles={customStyles}
+                  />
+                </DataTableExtensions>
               </div>
             </div>
           </div>
