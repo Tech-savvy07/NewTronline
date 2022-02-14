@@ -2442,6 +2442,112 @@ async function calculate_all_income_from_deposit() {
   }
 }
 
+async function remove_income() {
+  let result1 = await Deposit.findOne({
+    transaction_id: "3268325ca9af7ef75121f8909782da757df6ef4b245a2513cb1af8dd6f1eba0e"
+  })
+    .limit(1)
+    .exec();
+  if (result1 != null) {
+    let registration_data1 = await Registration.findOne({
+      investorId: result1.investorId,
+    }).exec();
+    let ref_id = registration_data1.promoterId;
+    // console.log(ref_id);
+    let joining_amt = result1.trx_amt / 1000000;
+    // let joining_amt = (joining * 40) / 100;
+    let i;
+    for (i = 1; i <= 20; i++) {
+      if (ref_id == 1 || ref_id == 0) {
+        // console.log("Break 1 Works");
+        i--;
+        break;
+      }
+      let net_income = (joining_amt * 2) / 100;
+      let reg = await Registration.findOne({
+        investorId: ref_id,
+      }).exec();
+      let w_amt = reg.wallet_amount;
+      let trancsaction = new Transaction({
+        investorId: ref_id,
+        random_id: reg.random_id,
+        wallet_address: reg.waddress,
+        income_from_id: result1.investorId,
+        income_from_random_id: registration_data1.random_id,
+        total_income: net_income,
+        transaction_id: result1.transaction_id,
+        income_type: "COMMUNITY LEVELUP INCOME",
+        invest_type: result1.invest_type,
+        level: result1.investorId - ref_id,
+      });
+      await trancsaction.save();
+      await Registration.updateOne({
+        investorId: reg.investorId,
+      }, {
+        $set: {
+          wallet_amount: Number(w_amt) + Number(net_income),
+        },
+      }).exec();
+      ref_id = reg.promoterId;
+      // count = i;
+      if (ref_id == 1 || ref_id == 0) {
+        // console.log("Break 2 Works")
+        break;
+      }
+    }
+    await Deposit.updateOne({
+      _id: result1._id,
+    }, {
+      $set: {
+        up_level_paid_status: 1,
+        up_level_paid: Number(i) - 1,
+      },
+    }).exec();
+    console.log("up level paid finished");
+  }
+
+  // Sponsor Level Income Starts
+  let result3 = await Deposit.findOne({
+    sponsor_level_paid: 0,
+    $and: [{
+      investorId: {
+        $ne: 127,
+      },
+    },
+    {
+      investorId: {
+        $ne: 1,
+      },
+    },
+    ],
+  })
+    .limit(1)
+    .exec();
+  if (result3 != null) {
+    j = 1;
+    registration_data3 = await Registration.findOne({
+      investorId: result3.investorId,
+    }).exec();
+    ref_id = registration_data3.referrerId ? registration_data3.referrerId : 0;
+    j = await seven_level_paid(
+      ref_id,
+      result3.trx_amt,
+      registration_data3.random_id,
+      result3.investorId,
+      result3.invest_type,
+      j,
+      result3.transaction_id
+    );
+    await Deposit.updateOne({
+      _id: result3._id,
+    }, {
+      $set: {
+        sponsor_level_paid: j,
+      },
+    }).exec();
+  }
+}
+
 async function delete_all_data() {
   // let tx_id = "61f4dfcc8ff0c920f702d1f8";
   // Deposit.findOne({transaction_id : tx_id})
