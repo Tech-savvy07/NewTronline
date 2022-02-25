@@ -76,6 +76,7 @@ export default function Home() {
     vip2: false,
     vip3: false,
   });
+  const [sdata, setsdata] = useState("");
 
   const sponsorcolumn = [
     {
@@ -342,36 +343,12 @@ export default function Home() {
       setref_id1(ref_ad[1]);
     }
     vipCount();
-
-    // if (state.wallet_address) {
-    // const url_address = window?.frames?.location?.href;
-    // // console.log("url address: ", url_address.split("?"), window);
-    // const url = url_address ? url_address.split("?")[1] : "";
-    // if (url && url.indexOf("ref_id") < 0) {
-    //   dispatch({ type: SET_ADDRESS, data: url });
-    // } else {
-    //   dispatch(getBalance(state.wallet_address));
-    // }
-    // loginStatus();
-    // checkVIP();
-    // levelIncome("SPONSORING INCOME");
-    // levelIncome("COMMUNITY LEVELDOWN INCOME");
-    // levelIncome("COMMUNITY LEVELUP INCOME");
-    // walletIncome();
-    // personalDetails();
-    // getWithdrawConditions();
-    // communityDetails();
-    // getCurrentInvestorId();
-    // myDirects();
-    // getWithdrawals();
-    // }
   }, []);
 
   useEffect(() => {
     if (state.wallet_address) {
       loginStatus();
       randomId();
-      getSponsorCounts();
       vipCount();
       checkVIP();
       walletIncome();
@@ -417,6 +394,7 @@ export default function Home() {
     if (state.isLoggedIn) {
       walletIncome();
       communityDetails();
+      getSponsorCounts();
       getWithdrawConditions();
       checkVIP();
       levelIncome("SPONSORING INCOME");
@@ -427,10 +405,6 @@ export default function Home() {
       dispatch({ type: SPONSOR_INCOME, data: 0 });
       dispatch({ type: UPLINE_INCOME, data: 0 });
     }
-    // myDirects();
-    // getWithdrawals();
-    // myvipsponsorincome();
-    // levelIncome("COMMUNITY LEVELDOWN INCOME");
   }, [state.investor_id]);
 
   useEffect(() => {
@@ -891,14 +865,53 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {state.siteData.promotion_status == 1 ?
-        <Marquee speed={130} pauseOnHover gradientWidth={0} className="text-light marquee-glow" style={{
-          fontSize: '22px',
-          background: '#ffffff33',
-          boxShadow: '1px 1px 1px s'
-        }} >
-          {state.siteData.promotion_msg}
-        </Marquee> : null}
+      {
+        state.siteData.promotion_marque_status == 1 ?
+          <Marquee speed={130} pauseOnHover gradientWidth={0} className="text-light marquee-glow mb-5" style={{
+            fontSize: '22px',
+            background: '#ffffff33',
+            boxShadow: '1px 1px 1px s'
+          }} >
+            {state.siteData.promotion_msg}
+          </Marquee> : null
+      }
+      {
+        // state.sitedata_loading ?
+
+        //for Testing
+        state.siteData.promotion_status == 0 ? null :
+          <div className="container p-4" style={{
+            background: "#8e8e8e54", boxShadow: "0px 0px 19px -6px",
+            borderRadius: "4px"
+          }}>
+            <h2 className="text-center pb-2" style={{ fontFamily: "'Noto Sans', sans-serif" }} >-- Promotions --</h2>
+            <div className="row">
+
+              <div class="owl-carousel owl-theme">
+                <div class="item"> <img
+                  src="./img/banner_1.png"
+                  className="img img-fluid"
+                  style={{ width: "100%", height: "100%" }}
+                /></div>
+                <div class="item"> <img
+                  src="./img/banner_2.jpg"
+                  className="img img-fluid"
+                  style={{ width: "100%", height: "100%" }}
+                /></div>
+                <div class="item"> <img
+                  src="./img/banner_3.jpg"
+                  className="img img-fluid"
+                  style={{ width: "100%", height: "100%" }}
+                /></div>
+              </div>
+
+            </div>
+
+          </div>
+
+      }
+
+
 
       <section className="banner_section pt_50 pb_50 mt-5">
         <div className="container">
@@ -1237,9 +1250,9 @@ export default function Home() {
 
             <>
               <div className="row cus_row">
-                <div className="col-md-6 col-sm-6 col-12">
+                <div className="col-md-6 col-sm-12 col-12">
                   <div className="Personal_Details_inner">
-                    <h3>Sponosor Count before 14th Feb</h3>
+                    <h3>Sponsor Count before 13th Feb</h3>
                     <div className="row cus_row">
                       <div className="col-md-3 col-sm-3 col-12">
                         <div className="Personal_Details_inner" style={{
@@ -1314,9 +1327,9 @@ export default function Home() {
                 </h5> */}
                   </div>
                 </div>
-                <div className="col-md-6 col-sm-6 col-12">
+                <div className="col-md-6 col-sm-12 col-12">
                   <div className="Personal_Details_inner">
-                    <h3>Sponosor Count after 14th Feb</h3>
+                    <h3>Sponsor Count after 14th Feb</h3>
                     <div className="row cus_row">
                       <div className="col-md-3 col-sm-3 col-12">
                         <div className="Personal_Details_inner" style={{
@@ -1401,7 +1414,7 @@ export default function Home() {
               trx={state.upline ? Number(state.upline).toFixed(2) : 0}
             />
             <CardIdinfo
-              CommunityLevel="7 level Sponsor Rewards"
+              CommunityLevel="12 level Sponsor Rewards"
               // UplineIncome="Income"
               trx={state.sponsor ? Number(state.sponsor).toFixed(2) : 0}
             />

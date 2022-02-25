@@ -293,8 +293,6 @@ export function getSiteData() {
       "cache-control": "no-cache",
       "Access-Control-Allow-Origin": "*",
     },
-    body: JSON.stringify({
-    }),
   })
     .then((d) => d.json())
     .catch((e) => e);

@@ -41,12 +41,13 @@ const initialState = {
   withdrawal_history: [],
   vip_withdrawal_history: [],
   all_up_down_income: [],
-  siteData: [],
+  siteData: '',
   personaldetails: {},
   withdraw_condition: {
     invest: 0,
     direct: 0,
   },
+  sitedata_loading: false,
 };
 
 const appStore = (state = initialState, action) => {
@@ -61,6 +62,7 @@ const appStore = (state = initialState, action) => {
       return {
         ...state,
         siteData: action.data,
+        sitedata_loading: true,
       };
 
     case SET_LOGGEDIN:

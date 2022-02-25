@@ -13,18 +13,16 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    function getSiteDatas() {
-      getSiteData()
-        .then((result) => {
-          if (result.status) {
-            dispatch({ type: SET_SITE_DATA, data: result.data });
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    }
-    getSiteDatas();
+    getSiteData()
+      .then((result) => {
+        if (result.status) {
+          console.log("apres::", result);
+          dispatch({ type: SET_SITE_DATA, data: result.data });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }, []);
 
   const maintenance = true;

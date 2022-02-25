@@ -307,35 +307,51 @@ async function getSponsorCount(req, res) {
     let before_5000 = 0;
     let before_10000 = 0;
     const investorId = req.body.investorId ? req.body.investorId : "";
-    await Registration.find({
+    await Deposit.find({
       referrerId: investorId,
-    }).then((data) => {
-      if (data) {
-        before_500 = data.length;
-        let a = data.map(async (it) => {
-          if (it.createdAt >= "2022-02-14T00:00:00") {
+      invest_type
+        : { $in: ["REINVEST", "INVEST"] },
+    }).then(async (data) => {
+      console.log("After Data :: ", data)
+      let a = data.map(async (it) => {
+        console.log(new Date(it.createdAt).getTime() >= 1644777000000, new Date(it.createdAt).getTime(), new Date("2022-02-14").getTime())
+        if (new Date(it.createdAt).getTime() >= 1644777000000) {
+          if (it.trx_amt == 500 * 1e6) {
             after_500 = after_500 + 1;
-            if (it.vip1) {
-              after_2000 = after_2000 + 1;
-            }
-            if (it.vip2) {
-              after_5000 = after_5000 + 1;
-            }
-            if (it.vip3) {
-              after_10000 = after_10000 + 1;
-            }
           }
-          if (it.vip1) {
+          else if (it.trx_amt == 2000 * 1e6) {
+            after_2000 = after_2000 + 1;
+          }
+          else if (it.trx_amt == 5000 * 1e6) {
+            after_5000 = after_5000 + 1;
+          }
+          else if (it.trx_amt == 10000 * 1e6) {
+            after_10000 = after_10000 + 1;
+          }
+        }
+      })
+      await Registration.find({
+        referrerId: investorId,
+        createdAt
+          : {
+          $lt:
+            new Date("2022-02-14T00:00:00")
+        }
+      }).then((sss) => {
+        before_500 = sss.length;
+        console.log(sss.length, "SSS");
+        let t = sss.map(async (its) => {
+          if (its.vip1) {
             before_2000 = before_2000 + 1;
           }
-          if (it.vip2) {
+          if (its.vip2) {
             before_5000 = before_5000 + 1;
           }
-          if (it.vip3) {
+          if (its.vip3) {
             before_10000 = before_10000 + 1;
           }
-        });
-        Promise.all(a).then(() => {
+        })
+        Promise.all(t).then(async () => {
           res.status(200).json({
             status: true,
             after_500: after_500,
@@ -348,8 +364,9 @@ async function getSponsorCount(req, res) {
             before_10000: before_10000,
           });
         })
-      }
-    });
+      })
+    })
+
     // console.log(reg);
   } catch (error) {
     console.log("Error in getSponsorCount", error.message);
